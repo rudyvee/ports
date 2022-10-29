@@ -1,6 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor
 from socket import AF_INET
 from socket import SOCK_STREAM
 from socket import socket
+from concurrent.futures import ThreadPoolExecutor
  
 def test_port_number(host, port):
     # create and configure the socket
@@ -15,9 +17,12 @@ def test_port_number(host, port):
  
 def port_scan(host, ports):
     print(f'Scanning {host}...')
-    for port in ports:
-        if test_port_number(host, port):
-            print(f'> {host}:{port} open')
+    with ThreadPoolExecutor(len(ports)) as executor:
+        results = executor.map(test_port_number, [host]*len(ports), ports)
+        for port in ports:
+            if test_port_number(host, port):
+                print(f'> {host}:{port} open')
+
  
 HOST = 'python.org'
 PORTS = range(1024)
